@@ -1,0 +1,67 @@
+.rooms-container{
+
+    width:70%;
+
+    margin:auto;
+
+    margin-top:30px;
+
+}
+
+.rooms-container input{
+
+    width:100%;
+
+    padding:12px;
+
+    border-radius:8px;
+
+    border:1px solid #ccc;
+
+    font-size:16px;
+
+}
+
+.rooms-container button{
+
+    padding:10px 18px;
+
+    border:none;
+
+    background:#4F46E5;
+
+    color:white;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+}
+
+.rooms-container button:hover{
+
+    background:#4338ca;
+
+}
+
+.room-card{
+
+    background:white;
+
+    padding:20px;
+
+    border-radius:12px;
+
+    margin-bottom:20px;
+
+    box-shadow:0 4px 12px rgba(0,0,0,.1);
+
+    transition:.3s;
+
+}
+
+.room-card:hover{
+
+    transform:translateY(-4px);
+
+}
