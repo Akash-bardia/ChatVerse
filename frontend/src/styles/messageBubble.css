@@ -1,69 +1,103 @@
-.message-row{
+/* ==========================================
+   Message Bubble — Dark Theme
+   ========================================== */
 
-    display:flex;
-
-    margin-bottom:18px;
-
-    align-items:flex-end;
-
+.message-row {
+    display: flex;
+    margin-bottom: 16px;
+    align-items: flex-end;
+    gap: 10px;
+    animation: fadeInUp 0.2s ease;
 }
 
-.message-row.mine{
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
 
-    justify-content:flex-end;
-
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.message-row.other{
-
-    justify-content:flex-start;
-
+.message-row.mine {
+    justify-content: flex-end;
 }
 
-.message{
-
-    max-width:60%;
-
-    padding:14px;
-
-    border-radius:18px;
-
-    word-wrap:break-word;
-
+.message-row.other {
+    justify-content: flex-start;
 }
 
-.mine .message{
-
-    background:#4f46e5;
-
-    color:white;
-
+.message-avatar {
+    flex-shrink: 0;
 }
 
-.other .message{
-
-    background:white;
-
-    color:black;
-
-    border:1px solid #ddd;
-
+.message-bubble {
+    max-width: 55%;
+    padding: 12px 16px;
+    border-radius: 18px;
+    word-wrap: break-word;
+    word-break: break-word;
+    line-height: 1.45;
 }
 
-.message-user{
-
-    font-weight:bold;
-
-    margin-bottom:6px;
-
+/* Own messages — accent gradient with top-right tail */
+.mine .message-bubble {
+    background: var(--accent-gradient);
+    color: #ffffff;
+    border-bottom-right-radius: 4px;
 }
 
-.message-time{
+/* Other messages — dark glass card with top-left tail */
+.other .message-bubble {
+    background: var(--glass-bg);
+    color: var(--text-main);
+    border: 1px solid var(--glass-border);
+    border-bottom-left-radius: 4px;
+}
 
-    margin-top:8px;
+.message-user {
+    font-weight: 600;
+    font-size: 0.75rem;
+    margin-bottom: 4px;
+    opacity: 0.8;
+    text-transform: capitalize;
+}
 
-    font-size:12px;
+.mine .message-user {
+    color: rgba(255, 255, 255, 0.75);
+}
 
-    opacity:.7;
+.other .message-user {
+    color: var(--accent-color);
+}
 
+.message-text {
+    font-size: 0.925rem;
+}
+
+.message-time {
+    margin-top: 6px;
+    font-size: 0.7rem;
+    opacity: 0.55;
+    text-align: right;
+}
+
+/* ==========================================
+   Responsive
+   ========================================== */
+
+@media (max-width: 768px) {
+    .message-bubble {
+        max-width: 75%;
+    }
+}
+
+@media (max-width: 480px) {
+    .message-bubble {
+        max-width: 85%;
+        padding: 10px 14px;
+    }
 }

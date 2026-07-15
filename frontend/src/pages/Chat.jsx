@@ -1,295 +1,171 @@
-import {
-    useEffect,
-    useState,
-    useRef
-} from "react"
-
+import { useEffect, useState, useRef } from "react"
 import { useParams } from "react-router-dom"
-
+import { toast } from "react-toastify"
 import API from "../services/api"
-
 import MessageBubble from "../components/MessageBubble"
 import Navbar from "../components/Navbar"
-
 import "../styles/chat.css"
 
 function Chat() {
-
     const { roomName } = useParams()
-
     const username = localStorage.getItem("username")
 
     const [socket, setSocket] = useState(null)
-
     const [messages, setMessages] = useState([])
-
     const [message, setMessage] = useState("")
-
     const [onlineUsers, setOnlineUsers] = useState([])
+    const [loadingMessages, setLoadingMessages] = useState(true)
 
     const messagesEndRef = useRef(null)
 
-    // Fetch Previous Messages
     async function fetchMessages() {
-
         try {
-
-            const response = await API.get(
-                `/messages/${roomName}`
-            )
-
+            const response = await API.get(`/messages/${roomName}`)
             setMessages(response.data)
-
+        } catch (err) {
+            toast.error("Failed to load messages")
+        } finally {
+            setLoadingMessages(false)
         }
-
-        catch (error) {
-
-            console.log(error)
-
-        }
-
     }
 
-    // Auto Scroll
+    // Auto-scroll to bottom when new messages arrive
     useEffect(() => {
-
-        messagesEndRef.current?.scrollIntoView({
-
-            behavior: "smooth"
-
-        })
-
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
     }, [messages])
 
-    // Connect WebSocket
+    // Connect to WebSocket on mount
     useEffect(() => {
-
         fetchMessages()
 
         const ws = new WebSocket(
-
             `ws://127.0.0.1:8000/ws/chat/${roomName}/${username}`
-
         )
 
         ws.onmessage = (event) => {
-
             try {
-
                 const data = JSON.parse(event.data)
 
-                // Online users
                 if (data.type === "online_users") {
-
                     setOnlineUsers(data.users)
-
                     return
-
                 }
 
-                // Chat message
-                setMessages((prev) => [
-
-                    ...prev,
-
-                    data
-
-                ])
-
+                setMessages((prev) => [...prev, data])
+            } catch {
+                toast.error("Failed to parse message")
             }
+        }
 
-            catch (error) {
-
-                console.log(error)
-
-            }
-
+        ws.onerror = () => {
+            toast.error("WebSocket connection error")
         }
 
         setSocket(ws)
 
         return () => {
-
             ws.close()
-
         }
-
     }, [roomName])
 
-    // Send Message
     function sendMessage() {
-
-        if (!message.trim()) return
-
-        if (!socket) return
+        if (!message.trim() || !socket) return
 
         socket.send(
-
             JSON.stringify({
-
                 username: username,
-
-                text: message
-
+                text: message,
             })
-
         )
 
         setMessage("")
-
     }
 
-    // Enter Key
     function handleKeyPress(e) {
-
         if (e.key === "Enter") {
-
             sendMessage()
-
         }
-
     }
+
+    const isSendDisabled = !message.trim()
 
     return (
-
         <>
-
             <Navbar />
 
             <div className="chat-container">
-
                 <div className="chat-header">
-
-                    <h2>
-
-                        💬 {roomName}
-
-                    </h2>
-
+                    <h2>💬 {roomName}</h2>
+                    <span className="chat-header-count">
+                        {onlineUsers.length} online
+                    </span>
                 </div>
 
                 <div className="chat-body">
-
-                    {/* Online Users */}
-
+                    {/* Online Users Sidebar */}
                     <div className="online-users">
-
-                        <h3>
-
-                            🟢 Online Users
-
-                        </h3>
-
-                        {
-
-                            onlineUsers.length === 0 ?
-
-                            (
-
-                                <p>
-
-                                    No users online
-
-                                </p>
-
-                            )
-
-                            :
-
-                            (
-
-                                onlineUsers.map((user, index) => (
-
-                                    <div
-
-                                        key={index}
-
-                                        className="online-user"
-
-                                    >
-
-                                        🟢 {user}
-
-                                    </div>
-
-                                ))
-
-                            )
-
-                        }
-
+                        <h3>🟢 Online Users</h3>
+                        {onlineUsers.length === 0 ? (
+                            <p className="online-users-empty">No users online</p>
+                        ) : (
+                            onlineUsers.map((user, index) => (
+                                <div key={index} className="online-user">
+                                    <span className="online-dot"></span>
+                                    {user}
+                                </div>
+                            ))
+                        )}
                     </div>
 
-                    {/* Chat Section */}
-
+                    {/* Chat Main Area */}
                     <div className="chat-main">
-
                         <div className="chat-messages">
-
-                            {
-
+                            {loadingMessages ? (
+                                <div className="loading-container">
+                                    <div className="loading-spinner"></div>
+                                    <span>Loading messages...</span>
+                                </div>
+                            ) : messages.length === 0 ? (
+                                <div className="empty-state">
+                                    <div className="empty-state-icon">💬</div>
+                                    <div className="empty-state-title">No messages yet</div>
+                                    <div className="empty-state-text">
+                                        Start the conversation! Send the first message.
+                                    </div>
+                                </div>
+                            ) : (
                                 messages.map((msg, index) => (
-
                                     <MessageBubble
-
                                         key={index}
-
                                         message={msg}
-
                                         currentUser={username}
-
                                     />
-
                                 ))
-
-                            }
-
+                            )}
                             <div ref={messagesEndRef}></div>
-
                         </div>
 
                         <div className="chat-input">
-
                             <input
-
                                 type="text"
-
                                 placeholder="Type your message..."
-
                                 value={message}
-
-                                onChange={(e) =>
-
-                                    setMessage(e.target.value)
-
-                                }
-
+                                onChange={(e) => setMessage(e.target.value)}
                                 onKeyDown={handleKeyPress}
-
                             />
-
                             <button
-
+                                className="chat-send-btn"
                                 onClick={sendMessage}
-
+                                disabled={isSendDisabled}
                             >
-
                                 Send
-
                             </button>
-
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
-
         </>
-
     )
-
 }
 
 export default Chat
