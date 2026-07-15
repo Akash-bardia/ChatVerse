@@ -359,7 +359,7 @@ Update UI Instantly
 
 **Akash**
 
-GitHub: https://github.com/<akash-bardia>
+GitHub: https://github.com/akash-bardia
 
 LinkedIn: https://linkedin.com/in/AkashBardia
 
